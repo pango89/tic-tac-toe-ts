@@ -1,19 +1,48 @@
-import { UserController } from './controllers/user.controller';
+// src/main.ts
+import { Player } from './models/player.model';
+import { TicTacToeGame } from './models/game.model';
+import { DefaultWinningStrategy } from './strategies/default-winning-strategy';
+import readlineSync from 'readline-sync';
 
-const userController = new UserController();
+// Create player 1
+const player1Name = 'John';
+const player1Symbol = 'X';
+const player1 = new Player(player1Name, player1Symbol);
 
-// Create a new user
-const userId = 1;
-const userName = 'John Doe';
-const user = userController.createUser(userId, userName);
-console.log(`Created user: ${user.id} - ${user.name}`);
+// Create player 2
+const player2Name = 'Jane';
+const player2Symbol = 'O';
+const player2 = new Player(player2Name, player2Symbol);
 
-// Get a user by ID
-const getUserById = userController.getUserById(userId);
-console.log(`Got user: ${getUserById.id} - ${getUserById.name}`);
+// Create a new game with player 1 and player 2
+const game = new TicTacToeGame(player1, player2, 3, new DefaultWinningStrategy());
 
-userController.createUser(2, "Jane Doe");
+while (true) {
+    console.log(`Welcome to Tic Tac Toe Game`);
+    console.log(`Player 1 (use X) vs player 2 (use O)`);
+    console.log(`Current Player: ${game.getCurrentPlayer()}`);
+    console.log('Game Board:');
+    game.printBoard();
 
-// Get all users
-const users = userController.getUsers();
-console.log(`Got users: ${users.map(user => user.id + ' - ' + user.name)}`);
+    const move = readlineSync.question(`${game.getCurrentPlayer().getName()} - Enter move (row and column, e.g. "1 2"): `);
+
+    if (move === null) {
+        console.log('Game cancelled.');
+        break;
+    }
+
+    const [row, col] = move.split(' ').map(Number);
+
+    game.makeMove(row, col);
+
+    if (game.isGameOver()) {
+        console.log('Game is over.');
+        game.printBoard();
+        if (game.isDraw()) {
+            console.log(`Game is drawn.`);
+        } else {
+            console.log(`Winner: ${game.getWinner()?.getName()}`);
+        }
+        break;
+    }
+}
